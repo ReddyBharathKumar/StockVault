@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockVault — Welcome</title>
+<link rel="stylesheet" href="style.css">
+<style>
+    body { display: flex; align-items: center; justify-content: center; min-height: 100vh; background: #f9fafb; margin: 0; }
+    .auth-card { background: white; padding: 3rem 2.5rem; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.05); width: 100%; max-width: 400px; text-align: center; }
+    .auth-card svg { color: #3b82f6; margin-bottom: 1.5rem; }
+    .auth-card h1 { font-size: 1.5rem; margin-bottom: 0.5rem; color: #111827; }
+    .auth-card p { color: #6b7280; font-size: 0.875rem; margin-bottom: 2rem; }
+    
+    .input-group { text-align: left; margin-bottom: 1.25rem; }
+    .input-group label { display: block; font-size: 0.875rem; font-weight: 500; margin-bottom: 0.5rem; color: #374151; }
+    .input-group input { width: 100%; padding: 0.75rem; border: 1px solid #d1d5db; border-radius: 6px; outline: none; transition: border-color 0.2s; box-sizing: border-box; }
+    .input-group input:focus { border-color: #3b82f6; }
+    
+    .btn-full { width: 100%; background: #3b82f6; color: white; border: none; padding: 0.875rem; border-radius: 6px; font-weight: 500; cursor: pointer; transition: background 0.2s; margin-top: 0.5rem; }
+    .btn-full:hover { background: #2563eb; }
+    
+    .toggle-text { margin-top: 1.5rem; font-size: 0.875rem; color: #6b7280; }
+    .toggle-link { color: #3b82f6; font-weight: 500; cursor: pointer; text-decoration: none; border: none; background: none; padding: 0; }
+    .toggle-link:hover { text-decoration: underline; }
+
+    .error-box { background: #fee2e2; color: #991b1b; padding: 0.75rem; border-radius: 6px; font-size: 0.875rem; margin-bottom: 1rem; text-align: left; border: 1px solid #fecaca; display: none; }
+</style>
+</head>
+<body>
+
+<div class="auth-card">
+    <svg viewBox="0 0 24 24" width="48" height="48" fill="none"><path d="M12 2 L21 7 V17 L12 22 L3 17 V7 Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 7 L12 12 L21 7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 12 V22" stroke="currentColor" stroke-width="1.6"/></svg>
+    
+    <!-- Dynamic Header -->
+    <h1 id="authTitle">Welcome back</h1>
+    <p id="authSubtitle">Sign in to your StockVault account</p>
+
+    <!-- Error message container -->
+    <div id="errorBox" class="error-box"></div>
+
+    <!-- SIGN IN FORM -->
+    <form id="signInForm">
+        <div class="input-group">
+            <label>Email address</label>
+            <input type="email" id="loginEmail" placeholder="name@company.com" required>
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="loginPassword" placeholder="••••••••" required>
+        </div>
+        <button type="submit" class="btn-full">Sign In</button>
+        <p class="toggle-text">Don't have an account? <button type="button" class="toggle-link" onclick="toggleAuthMode('signup')">Create one</button></p>
+    </form>
+
+    <!-- SIGN UP FORM -->
+    <form id="signUpForm" style="display: none;">
+        <div class="input-group">
+            <label>Full Name</label>
+            <input type="text" id="signupName" placeholder="Enter your full name" required>
+        </div>
+        <div class="input-group">
+            <label>Email address</label>
+            <input type="email" id="signupEmail" placeholder="Enter a valid email address" required>
+        </div>
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="signupPassword" placeholder="Create a strong password" required>
+        </div>
+        <button type="submit" class="btn-full">Create Account</button>
+        <p class="toggle-text">Already have an account? <button type="button" class="toggle-link" onclick="toggleAuthMode('signin')">Sign in</button></p>
+    </form>
+</div>
+
+<script>
+    function toggleAuthMode(mode) {
+        const title = document.getElementById('authTitle');
+        const subtitle = document.getElementById('authSubtitle');
+        const signIn = document.getElementById('signInForm');
+        const signUp = document.getElementById('signUpForm');
+        const errorBox = document.getElementById('errorBox');
+        
+        errorBox.style.display = 'none';
+
+        if (mode === 'signup') {
+            title.textContent = 'Create an account';
+            subtitle.textContent = 'Start managing your inventory today';
+            signIn.style.display = 'none';
+            signUp.style.display = 'block';
+        } else {
+            title.textContent = 'Welcome back';
+            subtitle.textContent = 'Sign in to your StockVault account';
+            signUp.style.display = 'none';
+            signIn.style.display = 'block';
+        }
+    }
+
+    function showError(message) {
+        const errorBox = document.getElementById('errorBox');
+        errorBox.textContent = message;
+        errorBox.style.display = 'block';
+    }
+
+    // --- HANDLE SIGN IN ---
+    document.getElementById('signInForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (!response.ok) {
+                throw new Error('Not a Registered User or Invalid Credentials');
+            }
+
+            const data = await response.json();
+            console.log("Full Backend Response:", data); // Check your console (F12) if needed
+
+            // Safely look for alternative key names your Java backend might use
+            const token = data.token || data.accessToken || data.jwt;
+            const name = data.fullName || data.name || email.split('@')[0];
+
+            if (!token) {
+                throw new Error('Login succeeded, but the server did not return a valid token.');
+            }
+
+            // Save valid tokens to local storage
+            localStorage.setItem('jwt_token', token);
+            localStorage.setItem('user_name', name);
+            
+            // Redirect to your inventory dashboard
+            window.location.href = 'inventory.html';
+            
+        } catch (err) {
+            showError(err.message);
+        }
+    });
+
+    // --- HANDLE SIGN UP ---
+    document.getElementById('signUpForm').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('signupName').value;
+        const email = document.getElementById('signupEmail').value;
+        const password = document.getElementById('signupPassword').value;
+
+        try {
+            const response = await fetch('http://localhost:8080/api/auth/signup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ fullName, email, password })
+            });
+
+            if (!response.ok) {
+                throw new Error('Could not create account. Email may already be registered.');
+            }
+
+            const data = await response.json();
+            localStorage.setItem('jwt_token', data.token);
+            localStorage.setItem('user_name', data.fullName);
+            window.location.href = 'inventory.html';
+        } catch (err) {
+            showError(err.message);
+        }
+    });
+</script>
+</body>
+</html>

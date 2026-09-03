@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>StockVault — Inventory</title>
+<!-- Include the script.js script for global features -->
+<script src="script.js" defer></script>
+<link rel="stylesheet" href="style.css">
+<!-- To check if the user is logged in before accessing inventory.html page -->
+<script>
+    // Check if a valid JWT token exists in localStorage before rendering the page
+    const token = localStorage.getItem('jwt_token') || localStorage.getItem('token');
+    
+    // If no token is found, instantly bounce them back to the login page (index.html)
+    if (!token) {
+        window.location.replace('index.html');
+    }
+</script>
+</head>
+<body>
+<div class="app-shell">
+
+  <!-- ============ SIDEBAR ============ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="brand">
+        <span class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none"><path d="M12 2 L21 7 V17 L12 22 L3 17 V7 Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M3 7 L12 12 L21 7" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 12 V22" stroke="currentColor" stroke-width="1.6"/></svg>
+        </span>
+        <span class="brand-name">StockVault</span>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav" aria-label="Primary">
+      <a class="nav-item" href="overview.html">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M4 13h6V4H4v9Zm0 7h6v-5H4v5Zm10 0h6V11h-6v9Zm0-16v5h6V4h-6Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span>Overview</span>
+      </a>
+      <a class="nav-item is-active" href="inventory.html" aria-current="page">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M3 7h18M3 12h18M3 17h18" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Inventory</span>
+      </a>
+      <a class="nav-item" href="orders.html">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M6 2h9l3 3v17H6V2Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 9h6M9 13h6M9 17h4" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+        <span>Orders</span>
+      </a>
+      <a class="nav-item" href="settings.html">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="1.6"/><path d="M19.4 13.5c.04-.5.04-1 0-1.5l2-1.5-2-3.4-2.3.9a7.6 7.6 0 0 0-1.3-.75L15.4 5h-4l-.4 2.25c-.47.2-.9.45-1.3.75l-2.3-.9-2 3.4 2 1.5c-.04.5-.04 1 0 1.5l-2 1.5 2 3.4 2.3-.9c.4.3.83.55 1.3.75L11.4 21h4l.4-2.25c.47-.2.9-.45 1.3-.75l2.3.9 2-3.4-2-1.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/></svg>
+        <span>Settings</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-bottom">
+      <div style="display: flex; align-items: center; position: relative; margin-bottom: 1rem;">
+        <a href="#" id="openSupportBtn" class="help-box" style="flex: 1; text-decoration: none; margin-bottom: 0;">
+          <svg viewBox="0 0 24 24" width="18" height="18" fill="none"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div><p class="help-title">Need help?</p><span class="help-link">Raise a ticket</span></div>
+        </a>
+        <a href="mailto:ragireddyreddappa@gmail.com?subject=Need%20Assistance%20with%20StockVault" class="tooltip-trigger" data-tooltip="Email: ragireddyreddappa@gmail.com" style="cursor: pointer; padding: 0.5rem; color: #9ca3af; position: absolute; right: 0; top: 8px; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+          <svg viewBox="0 0 24 24" width="16" height="16" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6"/><path d="M9.5 9a2.5 2.5 0 1 1 3.4 2.3c-.7.3-1.4.9-1.4 1.7v.3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/><circle cx="12" cy="16.7" r=".9" fill="currentColor"/></svg>
+        </a>
+      </div>
+      <p class="sidebar-copyright">© 2026 StockVault<br>All rights reserved</p>
+    </div>
+  </aside>
+
+
+  <!-- ============ MAIN ============ -->
+  <div class="main">
+    <header class="topbar">
+      <div class="search-wrap" role="search">
+        <svg class="search-icon" viewBox="0 0 24 24" width="16" height="16" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="m21 21-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="search" id="globalSearch" placeholder="Search inventory by name, SKU..." autocomplete="off">
+        <kbd class="kbd-hint">⌘K</kbd>
+      </div>
+      <div class="topbar-right">
+        <div style="position: relative;">
+          <!-- button issue  -->
+         <button class="icon-btn" id="notifBtn" style="width: 38px; height: 38px; display: inline-flex; align-items: center; justify-content: center;">
+    <svg viewBox="0 0 24 24" style="width: 22px !important; height: 22px !important; min-width: 22px; min-height: 22px; display: block;" fill="none">
+        <path d="M6 9a6 6 0 1 1 12 0c0 4.2 1.2 5.6 1.2 5.6H4.8S6 13.2 6 9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M10 18a2 2 0 0 0 4 0" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+    </svg>
+</button>
+          <div class="dropdown-menu" id="notifMenu">
+            <div class="dropdown-header">Notifications</div>
+            <div class="dropdown-item">📦 Action required: Low stock on items</div>
+          </div>
+        </div>
+        <div style="position: relative;">
+          <button class="user-chip" id="userMenuBtn">
+            <span class="avatar" aria-hidden="true" id="userAvatar">RB</span><span class="user-name" id="userNameDisplay">Reddy Bharath Kumar</span>
+          </button>
+          <div class="dropdown-menu" id="userMenu">
+          <div class="dropdown-header" id="dropdownUserHeader">Logged in as Reddy</div>          
+            <a href="account.html" class="dropdown-item" style="text-decoration: none;">Account Settings</a>
+            <a href="billing.html" class="dropdown-item" style="text-decoration: none;">Billing & Plans</a>
+            <div class="dropdown-item" id="logoutBtn" style="color: #ef4444; cursor: pointer;">Log Out</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="content">
+      <div class="page-header">
+        <h1>Inventory</h1>
+        <p>Manage and monitor all your products in one place.</p>
+      </div>
+
+      <div class="sub-nav-tabs">
+        <button class="tab-btn is-active" data-target="panel-products">All Products</button>
+        <button class="tab-btn" data-target="panel-categories">Categories</button>
+        <button class="tab-btn" data-target="panel-suppliers">Suppliers</button>
+      </div>
+
+      <!-- ============ PANEL: ALL PRODUCTS ============ -->
+      <div class="tab-content is-active" id="panel-products">
+        
+        <!-- Update your 3 existing metric cards to look like this -->
+<div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-bottom: 2rem;">
+  
+  <!-- 1. Total Products (Soft Blue Theme) -->
+  <div style="background: rgba(59, 130, 246, 0.06); border: 1px solid rgba(59, 130, 246, 0.15); border-radius: 8px; padding: 1.25rem;">
+    <h3 style="font-size: 0.85rem; color: #1e40af; font-weight: 600; margin-bottom: 0.3rem;">Total Products</h3>
+    <p id="metricTotalProducts" style="font-size: 1.5rem; font-weight: 700; color: #1e3a8a; margin: 0;">0</p>
+  </div>
+
+  <!-- 2. Total Stock Value (Soft Green Theme + Trend Badge) -->
+  <div style="background: rgba(16, 185, 129, 0.06); border: 1px solid rgba(16, 185, 129, 0.15); border-radius: 8px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center;">
+    <div>
+      <h3 style="font-size: 0.85rem; color: #065f46; font-weight: 600; margin-bottom: 0.3rem;">Total Stock Value</h3>
+      <p id="metricTotalValue" style="font-size: 1.5rem; font-weight: 700; color: #064e3b; margin: 0;">₹0.00</p>
+    </div>
+    <!-- Trend Indicator Badge -->
+    <div id="valueTrendBadge" style="background: rgba(16, 185, 129, 0.15); color: #065f46; padding: 0.3rem 0.5rem; border-radius: 6px; font-size: 0.8rem; font-weight: 600;">
+      <span id="trendArrow">↑</span> <span id="trendPercent">0.0%</span>
+    </div>
+  </div>
+
+  <!-- 3. Stock Alerts (Soft Red Theme) -->
+  <div style="background: rgba(239, 68, 68, 0.06); border: 1px solid rgba(239, 68, 68, 0.15); border-radius: 8px; padding: 1.25rem;">
+    <h3 style="font-size: 0.85rem; color: #991b1b; font-weight: 600; margin-bottom: 0.3rem;">Stock Alerts</h3>
+    <p id="metricLowStock" style="font-size: 1.5rem; font-weight: 700; color: #7f1d1d; margin: 0;">0</p>
+  </div>
+
+</div>
+
+        <!-- Toolbar: Sort and Add -->
+        <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+          <select id="sortSelect" style="padding: 0.5rem 1rem; border-radius: 6px; border: 1px solid #d1d5db; background: white; outline: none; cursor: pointer;">
+            <option value="name-asc">Name (A-Z)</option>
+            <option value="name-desc">Name (Z-A)</option>
+            <option value="price-asc">Price (Low to High)</option>
+            <option value="price-desc">Price (High to Low)</option>
+            <option value="stock-asc">Stock (Low to High)</option>
+            <option value="stock-desc">Stock (High to Low)</option>
+          </select>
+          <button id="addProductBtn" style="background: #3b82f6; color: white; padding: 0.6rem 1.25rem; border-radius: 6px; border: none; font-weight: 500; cursor: pointer;">+ Add New Product</button>
+        </div>
+
+        <!-- Bulk Actions Bar (Hidden by Default) -->
+        <div id="bulkBar" hidden style="background: #eff6ff; border: 1px solid #bfdbfe; padding: 0.75rem 1rem; border-radius: 8px; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center;">
+          <span id="bulkCount" style="color: #1e3a8a; font-weight: 500; font-size: 0.875rem;">0 selected</span>
+          <button id="batchDeleteBtn" style="background: #ef4444; color: white; border: none; padding: 0.5rem 1rem; border-radius: 6px; font-weight: 500; font-size: 0.875rem; cursor: pointer;">Delete Selected</button>
+        </div>
+
+        <!-- The Main Inventory Table -->
+        <div class="table-container" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+          <table style="width: 100%; border-collapse: collapse; text-align: left;">
+            <thead style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+              <tr>
+                <th style="padding: 1rem; width: 40px;"><input type="checkbox" id="selectAllCheckbox"></th>
+                <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">ID</th>
+                <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Image</th>
+                <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Product Name</th>
+                <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Price</th>
+                <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Stock</th>
+                <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Actions</th>
+              </tr>
+            </thead>
+            <!-- JS INJECTS ROWS HERE -->
+            <tbody id="tableBody"></tbody>
+          </table>
+
+          <!-- Table States -->
+          <div id="loadingState" style="padding: 4rem; text-align: center; color: #6b7280;">Loading inventory from Java...</div>
+          
+          <div id="errorState" hidden style="padding: 4rem; text-align: center; color: #ef4444;">
+            <h3 class="table-state-title" style="margin-bottom: 0.5rem; font-size: 1.1rem; color: #111827;">Error Loading Data</h3>
+            <p>Could not connect to localhost:8080. Make sure Spring Boot is running.</p>
+            <button id="retryBtn" style="margin-top: 1rem; background: white; border: 1px solid #d1d5db; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">Retry Connection</button>
+          </div>
+          
+          <div id="emptyState" hidden style="padding: 4rem; text-align: center; color: #6b7280;">
+            <h3 style="margin-bottom: 0.5rem; font-size: 1.1rem; color: #111827;">No Products Found</h3>
+            <p>Your database is currently empty.</p>
+            <button id="emptyAddBtn" style="margin-top: 1rem; background: white; border: 1px solid #d1d5db; padding: 0.5rem 1rem; border-radius: 6px; cursor: pointer;">+ Add Your First Product</button>
+          </div>
+        </div>
+
+        <!-- Pagination Control -->
+        <div class="pagination" style="display: flex; justify-content: space-between; align-items: center; padding-top: 1rem;">
+          <span id="paginationSummary" style="font-size: 0.875rem; color: #6b7280;"></span>
+          <div id="pager" style="display: flex; gap: 0.25rem;"></div>
+        </div>
+      </div>
+      
+ <!-- ============ PANEL: CATEGORIES ============ -->
+<div class="tab-content" id="panel-categories" style="display: none;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0 0 0.25rem 0;">Category Management</h2>
+      <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Organize your inventory stock by product classifications.</p>
+    </div>
+    <!-- Styled identically to the Add Product button -->
+    <button id="addCategoryBtn" style="background: #3b82f6; color: white; padding: 0.6rem 1.25rem; border-radius: 6px; border: none; font-weight: 500; cursor: pointer;">+ Add New Category</button>
+  </div>
+
+  <div class="table-container" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+        <tr>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Category Name</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Active Products</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Status</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Actions</th>
+        </tr>
+      </thead>
+      <tbody style="font-size: 0.875rem; color: #374151;" id="categoryTableBody">
+  <tr style="border-bottom: 1px solid #e5e7eb;">
+    <td style="padding: 1rem; font-weight: 500; color: #111827;" data-field="cat-name">Electronics</td>
+    <td style="padding: 1rem; color: #6b7280;" data-field="cat-count">12 items</td>
+    <td style="padding: 1rem;"><span style="background: #dcfce7; color: #166534; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;" data-field="cat-status">ACTIVE</span></td>
+    <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+      <button class="edit-category-btn" style="background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); color: #374151; border: 1px solid #cbd5e1; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.05);">Edit</button>
+      <button class="delete-category-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">Delete</button>
+    </td>
+  </tr>
+  <tr style="border-bottom: 1px solid #e5e7eb;">
+    <td style="padding: 1rem; font-weight: 500; color: #111827;" data-field="cat-name">Peripherals</td>
+    <td style="padding: 1rem; color: #6b7280;" data-field="cat-count">8 items</td>
+    <td style="padding: 1rem;"><span style="background: #dcfce7; color: #166534; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;" data-field="cat-status">ACTIVE</span></td>
+    <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+      <button class="edit-category-btn" style="background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); color: #374151; border: 1px solid #cbd5e1; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.05);">Edit</button>
+      <button class="delete-category-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">Delete</button>
+    </td>
+  </tr>
+</tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ============ PANEL: SUPPLIERS ============ -->
+<div class="tab-content" id="panel-suppliers" style="display: none;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <div>
+      <h2 style="font-size: 1.25rem; font-weight: 600; color: #111827; margin: 0 0 0.25rem 0;">Supplier Directory</h2>
+      <p style="font-size: 0.875rem; color: #6b7280; margin: 0;">Manage vendor details, contacts, and inbound stock sources.</p>
+    </div>
+    <!-- Styled identically to the Add Product button -->
+    <button id="addSupplierBtn" style="background: #3b82f6; color: white; padding: 0.6rem 1.25rem; border-radius: 6px; border: none; font-weight: 500; cursor: pointer;">+ Add Supplier</button>
+  </div>
+
+  <div class="table-container" style="background: white; border: 1px solid #e5e7eb; border-radius: 12px; overflow: hidden;">
+    <table style="width: 100%; border-collapse: collapse; text-align: left;">
+      <thead style="background: #f9fafb; border-bottom: 1px solid #e5e7eb;">
+        <tr>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Supplier Name</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Contact Person</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Email</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Phone</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Category</th>
+          <th style="padding: 1rem; font-size: 0.75rem; color: #6b7280; font-weight: 600; text-transform: uppercase;">Actions</th>
+        </tr>
+      </thead>
+     <tbody style="font-size: 0.875rem; color: #374151;" id="supplierTableBody">
+  <tr style="border-bottom: 1px solid #e5e7eb;">
+    <td style="padding: 1rem; font-weight: 500; color: #111827;" data-field="sup-name">TechCorp Global</td>
+    <td style="padding: 1rem;" data-field="sup-contact">John Smith</td>
+    <td style="padding: 1rem; color: #6b7280;" data-field="sup-email">john@techcorp.com</td>
+    <td style="padding: 1rem;" data-field="sup-phone">+1 (555) 234-5678</td>
+    <td style="padding: 1rem;"><span style="background: #eff6ff; color: #2563eb; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500;" data-field="sup-cat">Electronics</span></td>
+    <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+      <button class="edit-supplier-btn" style="background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); color: #374151; border: 1px solid #cbd5e1; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.05);">Edit</button>
+      <button class="delete-supplier-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">Delete</button>
+    </td>
+  </tr>
+</tbody>
+    </table>
+  </div>
+</div>
+        
+<!-- ============ ALL POP-UP MODALS ============ -->
+
+<!-- Support Ticket Modal (From earlier) -->
+<div class="modal-overlay" id="supportModal">
+  <!-- (Keep your existing Support Modal HTML here exactly as it is) -->
+</div>
+
+<!-- 1. Add/Edit Product Modal -->
+<div class="modal-overlay" id="productModalBackdrop">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div>
+        <h2 id="productModalTitle" style="font-size: 1.25rem; color: #111827;">Add Product</h2>
+        <p id="productModalSubtitle" style="font-size: 0.875rem; color: #6b7280;">Enter the details below.</p>
+      </div>
+      <button id="closeProductModal" class="close-btn" style="background:none; border:none; font-size:1.5rem; cursor:pointer;">&times;</button>
+    </div>
+    
+    <form id="productForm">
+      <input type="hidden" id="productId">
+      
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Product Name <span style="color:#ef4444;">*</span></label>
+        <input type="text" id="productName" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+        <div id="err-productName" class="field-error" style="color:#ef4444; font-size:0.75rem; margin-top:0.25rem;"></div>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem;">
+        <div>
+          <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Price (₹) <span style="color:#ef4444;">*</span></label>
+          <input type="number" step="0.01" id="productPrice" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+          <div id="err-productPrice" class="field-error" style="color:#ef4444; font-size:0.75rem; margin-top:0.25rem;"></div>
+        </div>
+        <div>
+          <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Stock Qty <span style="color:#ef4444;">*</span></label>
+          <input type="number" id="productStock" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+          <div id="err-productStock" class="field-error" style="color:#ef4444; font-size:0.75rem; margin-top:0.25rem;"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Image URL</label>
+        <input type="text" id="productImageUrl" placeholder="https://..." style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Category</label>
+        <input type="text" id="productCategory" placeholder="e.g. Electronics" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <button type="button" id="cancelProductBtn" style="background:white; border:1px solid #d1d5db; padding:0.6rem 1.25rem; border-radius:6px; font-weight:500; cursor:pointer;">Cancel</button>
+        <button type="submit" id="saveProductBtn" style="background:#3b82f6; color:white; border:none; padding:0.6rem 1.25rem; border-radius:6px; font-weight:500; cursor:pointer;">
+          <span class="btn-label">Save Product</span>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 2. Delete Confirmation Modal -->
+<div class="modal-overlay" id="deleteModalBackdrop">
+  <div class="modal-content" style="max-width: 400px; text-align: center;">
+    <h2 id="deleteModalTitle" style="font-size:1.25rem; color:#111827; margin-bottom:0.5rem;">Delete Product?</h2>
+    <p id="deleteModalMessage" style="font-size:0.875rem; color:#6b7280; margin-bottom:1.5rem;">Are you sure?</p>
+    
+    <div style="display: flex; gap: 1rem;">
+      <button type="button" id="cancelDeleteBtn" style="flex:1; background:white; border:1px solid #d1d5db; padding:0.75rem; border-radius:6px; font-weight:500; cursor:pointer;">Cancel</button>
+      <button type="button" id="confirmDeleteBtn" style="flex:1; background:#ef4444; color:white; border:none; padding:0.75rem; border-radius:6px; font-weight:500; cursor:pointer;">
+        <span class="btn-label">Delete</span>
+      </button>
+    </div>
+    <button id="closeDeleteModal" style="display:none;"></button>
+  </div>
+</div>
+
+<!-- 3. Toast Notifications Container -->
+<div id="toastContainer" style="position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px;"></div>
+
+<!-- 4. Add/Edit Category Modal -->
+<div class="modal-overlay" id="categoryModalBackdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+  <div class="modal-content" style="background: white; padding: 2rem; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 id="categoryModalTitle" style="font-size: 1.25rem; color: #111827; margin: 0;">Add Category</h2>
+      <button id="closeCategoryModal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#6b7280;">&times;</button>
+    </div>
+    <form id="categoryForm">
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Category Name *</label>
+        <input type="text" id="catNameInput" required style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Active Products Count</label>
+        <input type="text" id="catCountInput" placeholder="e.g. 12 items" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Status</label>
+        <select id="catStatusInput" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box; background:white;">
+          <option value="ACTIVE">ACTIVE</option>
+          <option value="INACTIVE">INACTIVE</option>
+        </select>
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <button type="button" id="cancelCategoryBtn" style="background:white; border:1px solid #d1d5db; padding:0.6rem 1.25rem; border-radius:6px; font-weight:500; cursor:pointer;">Cancel</button>
+        <button type="submit" style="background:#3b82f6; color:white; border:none; padding:0.6rem 1.25rem; border-radius:6px; font-weight:500; cursor:pointer;">Save Category</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- 5. Add/Edit Supplier Modal -->
+<div class="modal-overlay" id="supplierModalBackdrop" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 1000; align-items: center; justify-content: center;">
+  <div class="modal-content" style="background: white; padding: 2rem; border-radius: 12px; width: 100%; max-width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem;">
+      <h2 id="supplierModalTitle" style="font-size: 1.25rem; color: #111827; margin: 0;">Add Supplier</h2>
+      <button id="closeSupplierModal" style="background:none; border:none; font-size:1.5rem; cursor:pointer; color:#6b7280;">&times;</button>
+    </div>
+    <form id="supplierForm">
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Supplier Name *</label>
+        <input type="text" id="supNameInput" required style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Contact Person</label>
+        <input type="text" id="supContactInput" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Email</label>
+        <input type="email" id="supEmailInput" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom: 1rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Phone</label>
+        <input type="text" id="supPhoneInput" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      <div style="margin-bottom: 1.5rem;">
+        <label style="display:block; font-size:0.875rem; font-weight:500; margin-bottom:0.25rem;">Category</label>
+        <input type="text" id="supCatInput" style="width:100%; padding:0.75rem; border:1px solid #d1d5db; border-radius:6px; box-sizing:border-box;">
+      </div>
+      <div style="display: flex; justify-content: flex-end; gap: 1rem;">
+        <button type="button" id="cancelSupplierBtn" style="background:white; border:1px solid #d1d5db; padding:0.6rem 1.25rem; border-radius:6px; font-weight:500; cursor:pointer;">Cancel</button>
+        <button type="submit" style="background:#3b82f6; color:white; border:none; padding:0.6rem 1.25rem; border-radius:6px; font-weight:500; cursor:pointer;">Save Supplier</button>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- ============ SCRIPTS & LOGIC ============ -->
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+      
+    // --- 1. PERSISTENCE & AUTO-SEED ENGINE ---
+    function initStorage() {
+        if (!localStorage.getItem('stockvault_categories')) {
+            const defaultCategories = [
+                { name: 'Electronics', count: '12 items', status: 'ACTIVE' },
+                { name: 'Peripherals', count: '8 items', status: 'ACTIVE' }
+            ];
+            localStorage.setItem('stockvault_categories', JSON.stringify(defaultCategories));
+        }
+
+        if (!localStorage.getItem('stockvault_suppliers')) {
+            const defaultSuppliers = [
+                { name: 'TechCorp Global', contact: 'John Smith', email: 'john@techcorp.com', phone: '+1 (555) 234-5678', cat: 'Electronics' }
+            ];
+            localStorage.setItem('stockvault_suppliers', JSON.stringify(defaultSuppliers));
+        }
+    }
+
+    function saveCategoriesToStorage() {
+        const rows = document.querySelectorAll('#panel-categories tbody tr');
+        const categories = Array.from(rows).map(row => ({
+            name: row.querySelector('[data-field="cat-name"]')?.textContent.trim() || '',
+            count: row.querySelector('[data-field="cat-count"]')?.textContent.trim() || '',
+            status: row.querySelector('[data-field="cat-status"]')?.textContent.trim() || 'ACTIVE'
+        }));
+        localStorage.setItem('stockvault_categories', JSON.stringify(categories));
+    }
+
+    function saveSuppliersToStorage() {
+        const rows = document.querySelectorAll('#panel-suppliers tbody tr');
+        const suppliers = Array.from(rows).map(row => ({
+            name: row.querySelector('[data-field="sup-name"]')?.textContent.trim() || '',
+            contact: row.querySelector('[data-field="sup-contact"]')?.textContent.trim() || '',
+            email: row.querySelector('[data-field="sup-email"]')?.textContent.trim() || '',
+            phone: row.querySelector('[data-field="sup-phone"]')?.textContent.trim() || '',
+            cat: row.querySelector('[data-field="sup-cat"]')?.textContent.trim() || ''
+        }));
+        localStorage.setItem('stockvault_suppliers', JSON.stringify(suppliers));
+    }
+
+    function loadPersistedData() {
+        initStorage();
+
+        // Load Categories
+        const savedCats = localStorage.getItem('stockvault_categories');
+        if (savedCats) {
+            const categories = JSON.parse(savedCats);
+            const tbody = document.querySelector('#panel-categories tbody');
+            if (tbody) {
+                tbody.innerHTML = '';
+                categories.forEach(cat => {
+                    const newRow = document.createElement('tr');
+                    newRow.style.borderBottom = '1px solid #e5e7eb';
+                    newRow.innerHTML = `
+                        <td style="padding: 1rem; font-weight: 500; color: #111827;" data-field="cat-name">${cat.name}</td>
+                        <td style="padding: 1rem; color: #6b7280;" data-field="cat-count">${cat.count}</td>
+                        <td style="padding: 1rem;"><span style="background: #dcfce7; color: #166534; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;" data-field="cat-status">${cat.status}</span></td>
+                        <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                            <button class="edit-category-btn" style="background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); color: #374151; border: 1px solid #cbd5e1; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.05);">Edit</button>
+                            <button class="delete-category-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(newRow);
+                });
+            }
+        }
+
+        // Load Suppliers
+        const savedSups = localStorage.getItem('stockvault_suppliers');
+        if (savedSups) {
+            const suppliers = JSON.parse(savedSups);
+            const tbody = document.querySelector('#panel-suppliers tbody');
+            if (tbody) {
+                tbody.innerHTML = '';
+                suppliers.forEach(sup => {
+                    const newRow = document.createElement('tr');
+                    newRow.style.borderBottom = '1px solid #e5e7eb';
+                    newRow.innerHTML = `
+                        <td style="padding: 1rem; font-weight: 500; color: #111827;" data-field="sup-name">${sup.name}</td>
+                        <td style="padding: 1rem;" data-field="sup-contact">${sup.contact}</td>
+                        <td style="padding: 1rem; color: #6b7280;" data-field="sup-email">${sup.email}</td>
+                        <td style="padding: 1rem;" data-field="sup-phone">${sup.phone}</td>
+                        <td style="padding: 1rem;"><span style="background: #eff6ff; color: #2563eb; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500;" data-field="sup-cat">${sup.cat}</span></td>
+                        <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                            <button class="edit-supplier-btn" style="background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); color: #374151; border: 1px solid #cbd5e1; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.05);">Edit</button>
+                            <button class="delete-supplier-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(newRow);
+                });
+            }
+        }
+
+        // Restore last active sub-tab on reload so you don't jump back to Products
+        const activeTabTarget = localStorage.getItem('stockvault_active_inventory_tab');
+        if (activeTabTarget) {
+            const targetBtn = document.querySelector(`[data-target="${activeTabTarget}"]`);
+            if (targetBtn) {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('is-active', 'active'));
+                document.querySelectorAll('.tab-content').forEach(c => {
+                    c.classList.remove('is-active');
+                    c.style.display = 'none';
+                });
+                targetBtn.classList.add('is-active', 'active');
+                const targetPanel = document.getElementById(activeTabTarget);
+                if (targetPanel) {
+                    targetPanel.classList.add('is-active');
+                    targetPanel.style.display = 'block';
+                }
+            }
+        }
+    }
+
+    loadPersistedData();
+
+    // Remember sub-tab on click
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const target = btn.getAttribute('data-target');
+            if (target) {
+                localStorage.setItem('stockvault_active_inventory_tab', target);
+            }
+        });
+    });
+
+    // --- 2. FORM SUBMIT & ACTION HANDLERS ---
+    let editingCategoryRow = null;
+    let editingSupplierRow = null;
+    let rowToDelete = null;
+
+    // Category Form Submit
+    document.getElementById('categoryForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('catNameInput').value.trim();
+        const count = document.getElementById('catCountInput').value.trim();
+        const status = document.getElementById('catStatusInput').value.trim();
+
+        if (editingCategoryRow) {
+            editingCategoryRow.querySelector('[data-field="cat-name"]').textContent = name;
+            editingCategoryRow.querySelector('[data-field="cat-count"]').textContent = count;
+            editingCategoryRow.querySelector('[data-field="cat-status"]').textContent = status;
+        } else {
+            const tbody = document.querySelector('#panel-categories tbody');
+            const newRow = document.createElement('tr');
+            newRow.style.borderBottom = '1px solid #e5e7eb';
+            newRow.innerHTML = `
+                <td style="padding: 1rem; font-weight: 500; color: #111827;" data-field="cat-name">${name}</td>
+                <td style="padding: 1rem; color: #6b7280;" data-field="cat-count">${count}</td>
+                <td style="padding: 1rem;"><span style="background: #dcfce7; color: #166534; padding: 0.2rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600;" data-field="cat-status">${status}</span></td>
+                <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                    <button class="edit-category-btn" style="background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); color: #374151; border: 1px solid #cbd5e1; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.05);">Edit</button>
+                    <button class="delete-category-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        saveCategoriesToStorage();
+        
+        // Force modal close
+        const catModal = document.getElementById('categoryModalBackdrop');
+        if (catModal) {
+            catModal.classList.remove('active');
+            catModal.style.display = 'none';
+        }
+    });
+
+    // Supplier Form Submit
+    document.getElementById('supplierForm')?.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('supNameInput').value.trim();
+        const contact = document.getElementById('supContactInput').value.trim();
+        const email = document.getElementById('supEmailInput').value.trim();
+        const phone = document.getElementById('supPhoneInput').value.trim();
+        const cat = document.getElementById('supCatInput').value.trim();
+
+        if (editingSupplierRow) {
+            editingSupplierRow.querySelector('[data-field="sup-name"]').textContent = name;
+            editingSupplierRow.querySelector('[data-field="sup-contact"]').textContent = contact;
+            editingSupplierRow.querySelector('[data-field="sup-email"]').textContent = email;
+            editingSupplierRow.querySelector('[data-field="sup-phone"]').textContent = phone;
+            editingSupplierRow.querySelector('[data-field="sup-cat"]').textContent = cat;
+        } else {
+            const tbody = document.querySelector('#panel-suppliers tbody');
+            const newRow = document.createElement('tr');
+            newRow.style.borderBottom = '1px solid #e5e7eb';
+            newRow.innerHTML = `
+                <td style="padding: 1rem; font-weight: 500; color: #111827;" data-field="sup-name">${name}</td>
+                <td style="padding: 1rem;" data-field="sup-contact">${contact}</td>
+                <td style="padding: 1rem; color: #6b7280;" data-field="sup-email">${email}</td>
+                <td style="padding: 1rem;" data-field="sup-phone">${phone}</td>
+                <td style="padding: 1rem;"><span style="background: #eff6ff; color: #2563eb; padding: 0.25rem 0.5rem; border-radius: 4px; font-size: 0.75rem; font-weight: 500;" data-field="sup-cat">${cat}</span></td>
+                <td style="padding: 1rem; display: flex; gap: 0.5rem; align-items: center;">
+                    <button class="edit-supplier-btn" style="background: linear-gradient(135deg, #f9fafb 0%, #e5e7eb 100%); color: #374151; border: 1px solid #cbd5e1; padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,0.8), 0 1px 2px rgba(0,0,0,0.05);">Edit</button>
+                    <button class="delete-supplier-btn" style="background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 0.4rem 0.9rem; border-radius: 6px; font-size: 0.8rem; font-weight: 500; cursor: pointer;">Delete</button>
+                </td>
+            `;
+            tbody.appendChild(newRow);
+        }
+
+        saveSuppliersToStorage();
+        
+        // Force modal close
+        const supModal = document.getElementById('supplierModalBackdrop');
+        if (supModal) {
+            supModal.classList.remove('active');
+            supModal.style.display = 'none';
+        }
+    });
+
+    // Delegated Clicks (Edit & Delete)
+    document.querySelector('#panel-categories tbody')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('edit-category-btn')) {
+            editingCategoryRow = e.target.closest('tr');
+            document.getElementById('categoryModalTitle').textContent = "Edit Category";
+            document.getElementById('catNameInput').value = editingCategoryRow.querySelector('[data-field="cat-name"]').textContent.trim();
+            document.getElementById('catCountInput').value = editingCategoryRow.querySelector('[data-field="cat-count"]').textContent.trim();
+            document.getElementById('catStatusInput').value = editingCategoryRow.querySelector('[data-field="cat-status"]').textContent.trim();
+            document.getElementById('categoryModalBackdrop').classList.add('active');
+        } else if (e.target.classList.contains('delete-category-btn')) {
+            rowToDelete = e.target.closest('tr');
+            document.getElementById('deleteModalTitle').textContent = "Delete Category?";
+            document.getElementById('deleteModalMessage').textContent = "Are you sure you want to delete this category?";
+            document.getElementById('deleteModalBackdrop').classList.add('active');
+        }
+    });
+
+    document.querySelector('#panel-suppliers tbody')?.addEventListener('click', (e) => {
+        if (e.target.classList.contains('edit-supplier-btn')) {
+            editingSupplierRow = e.target.closest('tr');
+            document.getElementById('supplierModalTitle').textContent = "Edit Supplier";
+            document.getElementById('supNameInput').value = editingSupplierRow.querySelector('[data-field="sup-name"]').textContent.trim();
+            document.getElementById('supContactInput').value = editingSupplierRow.querySelector('[data-field="sup-contact"]').textContent.trim();
+            document.getElementById('supEmailInput').value = editingSupplierRow.querySelector('[data-field="sup-email"]').textContent.trim();
+            document.getElementById('supPhoneInput').value = editingSupplierRow.querySelector('[data-field="sup-phone"]').textContent.trim();
+            document.getElementById('supCatInput').value = editingSupplierRow.querySelector('[data-field="sup-cat"]').textContent.trim();
+            document.getElementById('supplierModalBackdrop').classList.add('active');
+        } else if (e.target.classList.contains('delete-supplier-btn')) {
+            rowToDelete = e.target.closest('tr');
+            document.getElementById('deleteModalTitle').textContent = "Delete Supplier?";
+            document.getElementById('deleteModalMessage').textContent = "Are you sure you want to remove this supplier?";
+            document.getElementById('deleteModalBackdrop').classList.add('active');
+        }
+    });
+
+    // Confirm Deletion
+    document.getElementById('confirmDeleteBtn')?.addEventListener('click', () => {
+        if (rowToDelete) {
+            const isCategory = rowToDelete.closest('#panel-categories');
+            rowToDelete.remove();
+            rowToDelete = null;
+            if (isCategory) {
+                saveCategoriesToStorage();
+            } else {
+                saveSuppliersToStorage();
+            }
+        }
+        document.getElementById('deleteModalBackdrop').classList.remove('active');
+    });
+
+    document.getElementById('cancelDeleteBtn')?.addEventListener('click', () => {
+        rowToDelete = null;
+        document.getElementById('deleteModalBackdrop').classList.remove('active');
+    });
+
+    // Modal Opening/Closing Handlers
+    document.getElementById('addCategoryBtn')?.addEventListener('click', () => {
+        editingCategoryRow = null;
+        document.getElementById('categoryModalTitle').textContent = "Add New Category";
+        document.getElementById('categoryForm').reset();
+        document.getElementById('categoryModalBackdrop').classList.add('active');
+    });
+    document.getElementById('closeCategoryModal')?.addEventListener('click', () => document.getElementById('categoryModalBackdrop').classList.remove('active'));
+    document.getElementById('cancelCategoryBtn')?.addEventListener('click', () => document.getElementById('categoryModalBackdrop').classList.remove('active'));
+
+    document.getElementById('addSupplierBtn')?.addEventListener('click', () => {
+        editingSupplierRow = null;
+        document.getElementById('supplierModalTitle').textContent = "Add New Supplier";
+        document.getElementById('supplierForm').reset();
+        document.getElementById('supplierModalBackdrop').classList.add('active');
+    });
+    document.getElementById('closeSupplierModal')?.addEventListener('click', () => document.getElementById('supplierModalBackdrop').classList.remove('active'));
+    document.getElementById('cancelSupplierBtn')?.addEventListener('click', () => document.getElementById('supplierModalBackdrop').classList.remove('active'));
+}); 
+</script>
+
+<!-- Load Shell and Engine Scripts AFTER utility functions are defined -->
+<script src="shell.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
